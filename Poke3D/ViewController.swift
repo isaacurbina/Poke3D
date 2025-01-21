@@ -42,7 +42,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 			bundle: Bundle.main
 		) {
 			configuration.trackingImages = imageToTrack
-			configuration.maximumNumberOfTrackedImages = 1
+			configuration.maximumNumberOfTrackedImages = 2
 			print("Images Successfully Added")
 		}
 		
@@ -65,27 +65,52 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 		
 		if let imageAnchor = anchor as? ARImageAnchor {
 			
-			let plane = SCNPlane(
-				width: imageAnchor.referenceImage.physicalSize.width,
-				height: imageAnchor.referenceImage.physicalSize.height
-			)
-			
-			plane.firstMaterial?.diffuse.contents = UIColor(white: 1.0, alpha: 0.5)
-			
-			let planeNode = SCNNode(geometry: plane)
-			planeNode.eulerAngles.x = -.pi / 2
-			
+			let planeNode = createPlaneNode(with: imageAnchor)
 			node.addChildNode(planeNode)
 			
-			if let pokeScene = SCNScene(named: "art.scnassets/eevee.scn") {
-				
-				if let pokeNode = pokeScene.rootNode.childNodes.first {
-					pokeNode.eulerAngles.x = .pi / 2
-					planeNode.addChildNode(pokeNode)
-				}
+			switch (imageAnchor.referenceImage.name){
+			case "eevee" :
+				let pokeNode = getPokeNode(named: "art.scnassets/eevee.scn")
+				planeNode.addChildNode(pokeNode!)
+				break
+			
+			case "oddish":
+				let pokeNode = getPokeNode(named: "art.scnAssets/oddish.scn")
+				planeNode.addChildNode(pokeNode!)
+				break
+			
+			default: break
 			}
 		}
 		
 		return node
+	}
+	
+	
+	// MARK: - private functions
+	
+	private func createPlaneNode(with imageAnchor : ARImageAnchor) -> SCNNode {
+		let plane = SCNPlane(
+			width: imageAnchor.referenceImage.physicalSize.width,
+			height: imageAnchor.referenceImage.physicalSize.height
+		)
+		
+		plane.firstMaterial?.diffuse.contents = UIColor(white: 1.0, alpha: 0.5)
+		
+		let planeNode = SCNNode(geometry: plane)
+		planeNode.eulerAngles.x = -.pi / 2
+		
+		return planeNode
+	}
+	
+	private func getPokeNode(named asset: String) -> SCNNode? {
+		if let pokeScene = SCNScene(named: asset) {
+			
+			if let pokeNode = pokeScene.rootNode.childNodes.first {
+				pokeNode.eulerAngles.x = .pi / 2
+				return pokeNode
+			}
+		}
+		return nil
 	}
 }
